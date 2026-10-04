@@ -1,5 +1,6 @@
 export const statuses = ['Diterima', 'Diagnosis', 'Menunggu persetujuan', 'Dikerjakan', 'Siap diambil', 'Selesai', 'Dibatalkan'] as const;
-export type Repair = { id: string; customer: string; phone: string; laptop: string; serial: string; complaint: string; damage: string; service: string; status: string; cost: number; paid: number; received: string; notes: string; updated: string };
+import { type ServiceLine, validateLines, totalLines, rupiah } from './services';
+export type Repair = { id: string; customer: string; phone: string; laptop: string; serial: string; complaint: string; damage: string; service: string; status: string; cost: number; paid: number; received: string; notes: string; updated: string; lines: ServiceLine[] };
 export function validateRepair(value: unknown): Omit<Repair, 'updated'> {
  if (!value || typeof value !== 'object') throw Error('Data tidak valid.');
  const v = value as Record<string, unknown>;
@@ -16,6 +17,9 @@ export function validateRepair(value: unknown): Omit<Repair, 'updated'> {
   if (!Number.isSafeInteger(v[key]) || Number(v[key]) < 0 || Number(v[key]) > 1000000000) throw Error('Biaya harus berupa rupiah bulat antara 0 dan 1 miliar.');
   result[key] = v[key];
  }
+ const lines=validateLines(v.lines ?? []);
+ result.lines=lines;
+ if(lines.length)result.cost=rupiah(totalLines(lines));
  if (Number(result.paid) > Number(result.cost)) throw Error('Pembayaran tidak boleh melebihi total biaya.');
  return result as Omit<Repair, 'updated'>;
 }
