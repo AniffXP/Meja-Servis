@@ -10,7 +10,7 @@ async function ready(){
   const response=await fetch(url,{signal:AbortSignal.timeout(1500)});
   if(!response.ok)return false;
   const html=await response.text();
-  if(!html.includes('MejaServis'))throw Error('Port 8787 dipakai aplikasi lain.');
+  if(!html.includes('Meja Servis')&&!html.includes('MejaServis'))throw Error('Port 8787 dipakai aplikasi lain.');
   const data=await fetch(url+'/api/repairs',{signal:AbortSignal.timeout(3000)});
   if(!data.ok)return false;
   return Array.isArray(await data.json());
@@ -26,12 +26,12 @@ try {
   await new Promise((resolve,reject)=>{child.once('spawn',resolve);child.once('error',reject)});
   writeFileSync('.sites-runtime/local-server.json',JSON.stringify({pid:child.pid,url,root}));
   child.unref();closeSync(out);closeSync(err);
-  console.log('Menyiapkan MejaServis...');
+  console.log('Menyiapkan Meja Servis...');
   let up=false;
   for(let i=0;i<45;i++){if(await ready()){up=true;break;}await new Promise(r=>setTimeout(r,1000));}
   if(!up)throw Error('Aplikasi belum siap. Lihat .sites-runtime/local-server-error.log untuk detail.');
  }
- console.log('MejaServis siap: '+url);
+ console.log('Meja Servis siap: '+url);
  if(!process.argv.includes('--no-open')){
   const browser=spawn('powershell.exe',['-NoProfile','-Command',"Start-Process 'http://127.0.0.1:8787'"],{windowsHide:true,stdio:'ignore'});
   await new Promise((resolve,reject)=>{browser.once('error',reject);browser.once('exit',code=>code===0?resolve():reject(Error('Buka browser ke '+url)))});
